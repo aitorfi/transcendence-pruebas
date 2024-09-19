@@ -1,33 +1,33 @@
 'use strict'
 
-import { initializeGame } from "./app.js"
+import { initializeGame, terminateGame } from "./app.js"
 
-const urlPageTitle = "JS SPA Router";
+const DEFAULT_PAGE_TITLE = "JS SPA Router";
 
-const urlRoutes = {
+const ROUTES = {
 	404: {
-		template: "/templates/404.html",
-		title: "404 | " + urlPageTitle,
+		template: "../templates/404.html",
+		title: "404 | " + DEFAULT_PAGE_TITLE,
 		description: "Page not found",
 	},
 	"/": {
-		template: "/templates/index.html",
-		title: "Home | " + urlPageTitle,
+		template: "../templates/index.html",
+		title: "Home | " + DEFAULT_PAGE_TITLE,
 		description: "This is the home page",
 	},
 	"/about": {
-		template: "/templates/about.html",
-		title: "About Us | " + urlPageTitle,
+		template: "../templates/about.html",
+		title: "About Us | " + DEFAULT_PAGE_TITLE,
 		description: "This is the about page",
 	},
 	"/contact": {
-		template: "/templates/contact.html",
-		title: "Contact Us | " + urlPageTitle,
+		template: "../templates/contact.html",
+		title: "Contact Us | " + DEFAULT_PAGE_TITLE,
 		description: "This is the contact page",
 	},
-	"/Game": {
-		template: "/templates/pong.html",
-		title: "Game | " + urlPageTitle,
+	"/game": {
+		template: "../templates/pong.html",
+		title: "Game | " + DEFAULT_PAGE_TITLE,
 		description: "This is the Pong Game",
 	}
 };
@@ -53,40 +53,23 @@ function navigationEventHandler(event) {
 async function loadWindowLocation() {
 	const location = window.location;
 	const locationPath = (location.length === 0) ? "/" : location.pathname;
-	const route = urlRoutes[locationPath] || urlRoutes["404"];
+	const route = ROUTES[locationPath] || ROUTES["404"];
 	
 	try {
-	  const response = await fetch(route.template);
-	  if (!response.ok) throw new Error('Network response was not ok');
-	  const html = await response.text();
-  
-	  document.getElementById("spa-template-content").innerHTML = html;
-	  document.title = route.title;
-	  document.querySelector('meta[name="description"]').setAttribute("content", route.description);
-  
-	  // Manejo de scripts
-	  if (locationPath === "/Game") {
-		// Elimina el script anterior si existe
-		const existingScript = document.querySelector('script[src="src/app.js"]');
-		if (existingScript) {
-		  existingScript.remove();
+		const response = await fetch(route.template);
+		if (!response.ok) throw new Error('Network response was not ok');
+		const html = await response.text();
+	
+		document.getElementById("spa-template-content").innerHTML = html;
+		document.title = route.title;
+		document.querySelector('meta[name="description"]').setAttribute("content", route.description);
+	
+		// Manejo de scripts
+		terminateGame();
+		if (locationPath === "/game") {
+			initializeGame();
 		}
-  
-		// Carga el script del juego
-		const script = document.createElement('script');
-		script.src = 'src/app.js';
-		script.onload = () => {
-		//   if (typeof window.initializeGame === 'function') {
-		// 	window.initializeGame(); // Llama a la función de inicialización
-		//   }
-		  initializeGame();
-		};
-		document.body.appendChild(script);
-	  }
 	} catch (error) {
-	  console.error('Error fetching template:', error);
+	  	console.error('Error fetching template:', error);
 	}
-  }
-  
-  
-  
+}
